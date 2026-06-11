@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntraLink — Advanced Blood Triage Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#fff5f5', 100: '#fed7d7', 500: '#ef4444', 600: '#dc2626', 700: '#b91c1c', 900: '#450a0a' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen flex font-sans selection:bg-brand-100 selection:text-brand-700">
+
+    <div id="authPortal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cover bg-center" 
+         style="background-image: linear-gradient(135deg, rgba(69, 10, 10, 0.9) 20%, rgba(15, 23, 42, 0.95) 100%), url('https://images.unsplash.com/photo-1579154204601-01588f351167?q=80&w=1920&auto=format&fit=crop');">
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-10 w-full max-w-md shadow-2xl border border-white/20">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-50 text-brand-600 text-5xl mb-4 relative shadow-inner">
+                    <span>🩸</span>
+                    <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-600"></span>
+                    </span>
+                </div>
+                <h2 id="authTitle" class="text-2xl font-black text-slate-900 tracking-tight">Hospital Portal Entry</h2>
+                <p id="authSubtitle" class="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1">Smart Emergency Triage Network</p>
+            </div>
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Workstation Position</label>
+                    <input type="text" id="usernameField" required class="w-full px-4 py-3.5 border border-slate-200 rounded-2xl text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition bg-slate-50/50 font-medium" placeholder="Enter workstation ID">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Secure Passkey</label>
+                    <input type="password" id="passwordField" required class="w-full px-4 py-3.5 border border-slate-200 rounded-2xl text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition bg-slate-50/50 font-medium" placeholder="••••••••">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full bg-gradient-to-r from-brand-600 to-brand-700 text-white font-bold py-4 rounded-2xl shadow-xl shadow-brand-700/20 transition transform active:scale-[0.95]">Sign In to Workstation</button>
+            </form>
+            <div class="mt-8 pt-5 border-t border-slate-100 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <span>Authorized Unit Check?</span>
+                <a href="#" id="toggleAuthModeLink" onclick="toggleAuthMode()" class="text-blue-600 hover:underline ml-1">Register Point</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainDashboard" class="hidden flex-1 flex min-h-screen">
+        
+        <aside class="w-72 bg-slate-950 text-slate-400 flex flex-col border-r border-slate-800 shrink-0 sticky top-0 h-screen z-30">
+            <div class="p-6 h-20 border-b border-slate-900 flex items-center space-x-3">
+                <span class="text-2xl">🩸</span>
+                <div>
+                    <h1 class="text-sm font-black text-white tracking-widest uppercase">IntraLink Engine</h1>
+                    <p class="text-[9px] text-brand-500 font-extrabold uppercase tracking-widest">Core Management System</p>
+                </div>
+            </div>
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto text-sm font-semibold">
+                <a href="#" onclick="switchView('view-dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition bg-slate-900 text-white" id="nav-dashboard"><span>🏠</span> <span>1. Dashboard Overview</span></a>
+                <div class="pt-4 pb-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest px-4">Registry Management</div>
+                <a href="#" onclick="switchView('view-register')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-register"><span>👤</span> <span>2. Donor Registration</span></a>
+                <a href="#" onclick="switchView('view-search')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-search"><span>🔍</span> <span>3. Search Database</span></a>
+                <a href="#" onclick="switchView('view-manage')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-manage"><span>📝</span> <span>4. Donor Management</span></a>
+                <div class="pt-4 pb-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest px-4">Activity Logs</div>
+                <a href="#" onclick="switchView('view-history')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-history"><span>📂</span> <span>5. Donation History</span></a>
+                <div class="pt-4 pb-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest px-4">Emergency Dispatch</div>
+                <a href="#" onclick="switchView('view-emergency')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-emergency"><span>🚨</span> <span>6. Blood Requests</span></a>
+                <div class="pt-4 pb-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest px-4">System Utilities</div>
+                <a href="#" onclick="switchView('view-eligibility')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-eligibility"><span>✅</span> <span>7. Eligibility Verification</span></a>
+                <a href="#" onclick="switchView('view-analytics')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl transition hover:bg-slate-900 hover:text-white" id="nav-analytics"><span>📊</span> <span>8. Analytics Dashboard</span></a>
+            </nav>
+            <div class="p-4 border-t border-slate-900 flex items-center justify-between bg-slate-950/50">
+                <span id="navUserDisplay" class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Station</span>
+                <button onclick="handleLogout()" class="text-xs text-red-400 font-bold hover:underline">Log Out</button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+            <header class="h-20 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3 text-sm font-semibold text-slate-500">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <p>Live Server Connection: Synchronized</p>
+                </div>
+                <button onclick="syncDashboardData()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-black px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/10 transition">
+                    🔄 Sync Workspace
+                </button>
+            </header>
+
+            <div class="p-8 max-w-7xl w-full mx-auto flex-1">
+                
+                <div id="view-dashboard" class="space-y-8 app-view">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                            <div><p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Registered Donors</p><h3 id="dash-total" class="text-3xl font-black text-slate-900 font-mono mt-1">0</h3></div>
+                            <span class="text-2xl bg-blue-50 p-3 rounded-2xl text-blue-600 border border-blue-100">👥</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                            <div><p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Available Units</p><h3 id="dash-available" class="text-3xl font-black text-slate-900 font-mono mt-1">0</h3></div>
+                            <span class="text-2xl bg-emerald-50 p-3 rounded-2xl text-emerald-600 border border-emerald-100">💚</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                            <div><p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Active Emergencies</p><h3 id="dash-emergencies" class="text-3xl font-black text-rose-600 font-mono mt-1">0</h3></div>
+                            <span class="text-2xl bg-rose-50 p-3 rounded-2xl text-rose-600 border border-rose-100">🚨</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                            <div><p class="text-xs font-bold tracking-wider text-slate-400 uppercase">Peak Demand Type</p><h3 id="dash-peak-group" class="text-3xl font-black text-slate-900 font-mono mt-1">O+</h3></div>
+                            <span class="text-2xl bg-amber-50 p-3 rounded-2xl text-amber-600 border border-amber-100">🩸</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="bg-white rounded-3xl p-6 border border-slate-200/60 lg:col-span-2 shadow-sm">
+                            <h2 class="text-base font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">👥 Recent Donor Profiles</h2>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-100"><table id="dashTable" class="w-full text-sm divide-y divide-slate-100"><thead class="bg-slate-50"><tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider"><th class="p-4">ID</th><th class="p-4">Name</th><th class="p-4">Blood Group</th><th class="p-4">District</th><th class="p-4">Availability</th></tr></thead><tbody class="divide-y divide-slate-100 font-semibold text-slate-700"></tbody></table></div>
+                        </div>
+                        <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm flex flex-col">
+                            <h2 class="text-base font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">⚡ Recent Emergency Tickets</h2>
+                            <div id="dashHeap" class="space-y-3 flex-1 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-register" class="hidden max-w-2xl bg-white rounded-3xl p-8 border border-slate-200/60 shadow-sm app-view">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight mb-2">Register New Donor Profile</h2>
+                    <p class="text-xs font-medium text-slate-400 mb-6 pb-4 border-b border-slate-100">Add new donor information into the secure registry database.</p>
+                    <form onsubmit="handleWebDonorRegistration(event)" class="space-y-5 text-sm font-semibold">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Donor ID Code</label><input type="text" id="reg-id" required class="w-full p-3.5 border border-slate-200 rounded-xl outline-none focus:border-brand-500" placeholder="e.g. D105"></div>
+                            <div><label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required class="w-full p-3.5 border border-slate-200 rounded-xl outline-none focus:border-brand-500" placeholder="Kasun Fernando"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Blood Group Category</label>
+                                <select id="reg-blood" class="w-full p-3.5 border border-slate-200 rounded-xl bg-white outline-none">
+                                    <option>A+</option>
+                                    <option>A-</option>
+                                    <option>B+</option>
+                                    <option>B-</option>
+                                    <option>O+</option>
+                                    <option>O-</option>
+                                    <option>AB+</option>
+                                    <option>AB-</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">District Location</label>
+                                <select id="reg-district" class="w-full p-3.5 border border-slate-200 rounded-xl bg-white outline-none">
+                                    <option value="Colombo">Colombo</option>
+                                    <option value="Gampaha">Gampaha</option>
+                                    <option value="Kalutara">Kalutara</option>
+                                    <option value="Kandy">Kandy</option>
+                                    <option value="Matale">Matale</option>
+                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                                    <option value="Galle">Galle</option>
+                                    <option value="Matara">Matara</option>
+                                    <option value="Hambantota">Hambantota</option>
+                                    <option value="Jaffna">Jaffna</option>
+                                    <option value="Kilinochchi">Kilinochchi</option>
+                                    <option value="Mannar">Mannar</option>
+                                    <option value="Mullaitivu">Mullaitivu</option>
+                                    <option value="Vavuniya">Vavuniya</option>
+                                    <option value="Trincomalee">Trincomalee</option>
+                                    <option value="Batticaloa">Batticaloa</option>
+                                    <option value="Ampara">Ampara</option>
+                                    <option value="Kurunegala">Kurunegala</option>
+                                    <option value="Puttalam">Puttalam</option>
+                                    <option value="Anuradhapura">Anuradhapura</option>
+                                    <option value="Polonnaruwa">Polonnaruwa</option>
+                                    <option value="Badulla">Badulla</option>
+                                    <option value="Monaragala">Monaragala</option>
+                                    <option value="Ratnapura">Ratnapura</option>
+                                    <option value="Kegalle">Kegalle</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Contact Number</label><input type="tel" id="reg-contact" required class="w-full p-3.5 border border-slate-200 rounded-xl outline-none" placeholder="071XXXXXXX"></div>
+                            <div><label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Initial Availability</label><select id="reg-avail" class="w-full p-3.5 border border-slate-200 rounded-xl bg-white outline-none"><option value="true">Available</option><option value="false">Unavailable</option></select></div>
+                        </div>
+                        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-600/10">Complete Registration</button>
+                    </form>
+                </div>
+
+                <div id="view-search" class="hidden space-y-6 app-view">
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                        <h2 class="text-base font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">🔍 Advanced Registry Search</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <div>
+                                <label class="block mb-2">Blood Group</label>
+                                <select id="search-blood" class="w-full p-3 border border-slate-200 rounded-xl bg-white text-slate-700">
+                                    <option value="ALL">All Groups</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-2">District Area</label>
+                                <select id="search-district" class="w-full p-3 border border-slate-200 rounded-xl bg-white text-slate-700">
+                                    <option value="ALL">All Districts</option>
+                                    <option value="Colombo">Colombo</option>
+                                    <option value="Gampaha">Gampaha</option>
+                                    <option value="Kalutara">Kalutara</option>
+                                    <option value="Kandy">Kandy</option>
+                                    <option value="Matale">Matale</option>
+                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                                    <option value="Galle">Galle</option>
+                                    <option value="Matara">Matara</option>
+                                    <option value="Hambantota">Hambantota</option>
+                                    <option value="Jaffna">Jaffna</option>
+                                    <option value="Kilinochchi">Kilinochchi</option>
+                                    <option value="Mannar">Mannar</option>
+                                    <option value="Mullaitivu">Mullaitivu</option>
+                                    <option value="Vavuniya">Vavuniya</option>
+                                    <option value="Trincomalee">Trincomalee</option>
+                                    <option value="Batticaloa">Batticaloa</option>
+                                    <option value="Ampara">Ampara</option>
+                                    <option value="Kurunegala">Kurunegala</option>
+                                    <option value="Puttalam">Puttalam</option>
+                                    <option value="Anuradhapura">Anuradhapura</option>
+                                    <option value="Polonnaruwa">Polonnaruwa</option>
+                                    <option value="Badulla">Badulla</option>
+                                    <option value="Monaragala">Monaragala</option>
+                                    <option value="Ratnapura">Ratnapura</option>
+                                    <option value="Kegalle">Kegalle</option>
+                                </select>
+                            </div>
+                            <div><label class="block mb-2">Availability Status</label><select id="search-avail" class="w-full p-3 border border-slate-200 rounded-xl bg-white text-slate-700"><option value="ALL">All States</option><option value="true">Available Only</option><option value="false">Unavailable</option></select></div>
+                            <div class="flex items-end"><button onclick="executeFilterSearch()" class="w-full bg-slate-900 text-white text-sm font-bold py-3 px-4 rounded-xl hover:bg-slate-800 transition">Run Search</button></div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Search Results</h3>
+                        <div class="overflow-x-auto rounded-2xl border border-slate-100"><table id="searchTable" class="w-full text-sm divide-y divide-slate-100"><thead class="bg-slate-50"><tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider"><th class="p-4">ID</th><th class="p-4">Full Name</th><th class="p-4">Blood Group</th><th class="p-4">District</th><th class="p-4">Availability</th></tr></thead><tbody class="divide-y divide-slate-100 font-semibold text-slate-700"></tbody></table></div>
+                    </div>
+                </div>
+
+                <div id="view-manage" class="hidden bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm app-view">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
+                        <div>
+                            <h2 class="text-base font-extrabold text-slate-900">Donor Records Database</h2>
+                            <p class="text-xs text-slate-400 font-medium">Update donor details, modify availability statuses, and manage registry records.</p>
+                        </div>
+                    </div>
+                    <div id="editFormBox" class="hidden mb-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 text-xs font-bold uppercase text-slate-500">
+                        <h3 class="text-slate-900 font-black text-sm tracking-tight normal-case">Update Record Details</h3>
+                        <div class="grid grid-cols-4 gap-4">
+                            <input type="hidden" id="edit-id">
+                            <div><label class="block mb-1">Contact Number</label><input type="text" id="edit-contact" class="w-full p-2.5 border rounded-lg text-slate-800 font-semibold text-sm uppercase"></div>
+                            <div>
+                                <label class="block mb-1">District Area</label>
+                                <select id="edit-district" class="w-full p-2.5 border rounded-lg text-slate-800 font-semibold text-sm bg-white">
+                                    <option value="Colombo">Colombo</option>
+                                    <option value="Gampaha">Gampaha</option>
+                                    <option value="Kalutara">Kalutara</option>
+                                    <option value="Kandy">Kandy</option>
+                                    <option value="Matale">Matale</option>
+                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                                    <option value="Galle">Galle</option>
+                                    <option value="Matara">Matara</option>
+                                    <option value="Hambantota">Hambantota</option>
+                                    <option value="Jaffna">Jaffna</option>
+                                    <option value="Kilinochchi">Kilinochchi</option>
+                                    <option value="Mannar">Mannar</option>
+                                    <option value="Mullaitivu">Mullaitivu</option>
+                                    <option value="Vavuniya">Vavuniya</option>
+                                    <option value="Trincomalee">Trincomalee</option>
+                                    <option value="Batticaloa">Batticaloa</option>
+                                    <option value="Ampara">Ampara</option>
+                                    <option value="Kurunegala">Kurunegala</option>
+                                    <option value="Puttalam">Puttalam</option>
+                                    <option value="Anuradhapura">Anuradhapura</option>
+                                    <option value="Polonnaruwa">Polonnaruwa</option>
+                                    <option value="Badulla">Badulla</option>
+                                    <option value="Monaragala">Monaragala</option>
+                                    <option value="Ratnapura">Ratnapura</option>
+                                    <option value="Kegalle">Kegalle</option>
+                                </select>
+                            </div>
+                            <div><label class="block mb-1">Availability Status</label><select id="edit-avail" class="w-full p-2.5 border rounded-lg text-slate-800 font-semibold text-sm bg-white"><option value="true">Available</option><option value="false">Unavailable</option></select></div>
+                            <div class="flex items-end"><button onclick="saveNodeEdits()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-xs tracking-wider">Save Changes</button></div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-100"><table id="manageTable" class="w-full text-sm divide-y divide-slate-100"><thead class="bg-slate-50"><tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider"><th class="p-4">ID Reference</th><th class="p-4">Name Record</th><th class="p-4">Blood Group</th><th class="p-4">Current District</th><th class="p-4">Availability</th><th class="p-4 text-right">Administrative Controls</th></tr></thead><tbody class="divide-y divide-slate-100 font-semibold text-slate-700"></tbody></table></div>
+                </div>
+
+                <div id="view-history" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 app-view">
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm lg:col-span-1 h-fit">
+                        <h2 class="text-base font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100">Select Donor Record</h2>
+                        <div id="historySelectorContainer" class="space-y-2"></div>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm lg:col-span-2 flex flex-col">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
+                            <div>
+                                <h2 class="text-base font-extrabold text-slate-900">🔀 Donation History Timeline</h2>
+                                <p class="text-xs text-slate-400 font-medium">Maintains chronological logs for full tracking visibility.</p>
+                            </div>
+                        </div>
+                        <div class="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-500 uppercase grid grid-cols-3 gap-4 items-end">
+                            <div><label class="block mb-1">Donation Date</label><input type="date" id="dll-input-date" class="w-full p-2 border rounded-lg text-slate-800"></div>
+                            <div><label class="block mb-1">Hospital Location</label><input type="text" id="dll-input-hosp" class="w-full p-2 border rounded-lg text-slate-800" placeholder="e.g. National Hospital"></div>
+                            <button onclick="injectNewDLLBlock()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-lg text-xs">Add History Record</button>
+                        </div>
+                        <div id="dllTimeline" class="space-y-4 flex-1"></div>
+                    </div>
+                </div>
+
+                <div id="view-emergency" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 app-view">
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm lg:col-span-1">
+                        <h2 class="text-base font-extrabold text-slate-900 mb-2">Create High-Priority Request</h2>
+                        <p class="text-xs font-medium text-slate-400 mb-6 pb-3 border-b border-slate-100">Submits urgent requests directly to the priority triage pipeline.</p>
+                        <form onsubmit="handleWebEmergencyRequest(event)" class="space-y-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <div><label class="block mb-1.5">Request Reference ID</label><input type="text" id="em-id" required class="w-full p-3 border border-slate-200 rounded-xl font-semibold text-slate-700 outline-none focus:border-brand-500" placeholder="REQ-990"></div>
+                            <div><label class="block mb-1.5">Requesting Hospital Name</label><input type="text" id="em-hospital" required class="w-full p-3 border border-slate-200 rounded-xl font-semibold text-slate-700 outline-none focus:border-brand-500" placeholder="e.g. National Hospital"></div>
+                            <div>
+                                <label class="block mb-1.5">Blood Classification Urgently Needed</label>
+                                <select id="em-blood" class="w-full p-3 border border-slate-200 rounded-xl bg-white font-semibold text-slate-700 outline-none">
+                                    <option>A+</option>
+                                    <option>A-</option>
+                                    <option>B+</option>
+                                    <option>B-</option>
+                                    <option>O+</option>
+                                    <option>O-</option>
+                                    <option>AB+</option>
+                                    <option>AB-</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1.5">District Delivery Location</label>
+                                <select id="em-district" class="w-full p-3 border border-slate-200 rounded-xl bg-white font-semibold text-slate-700 outline-none">
+                                    <option value="Colombo">Colombo</option>
+                                    <option value="Gampaha">Gampaha</option>
+                                    <option value="Kalutara">Kalutara</option>
+                                    <option value="Kandy">Kandy</option>
+                                    <option value="Matale">Matale</option>
+                                    <option value="Nuwara Eliya">Nuwara Eliya</option>
+                                    <option value="Galle">Galle</option>
+                                    <option value="Matara">Matara</option>
+                                    <option value="Hambantota">Hambantota</option>
+                                    <option value="Jaffna">Jaffna</option>
+                                    <option value="Kilinochchi">Kilinochchi</option>
+                                    <option value="Mannar">Mannar</option>
+                                    <option value="Mullaitivu">Mullaitivu</option>
+                                    <option value="Vavuniya">Vavuniya</option>
+                                    <option value="Trincomalee">Trincomalee</option>
+                                    <option value="Batticaloa">Batticaloa</option>
+                                    <option value="Ampara">Ampara</option>
+                                    <option value="Kurunegala">Kurunegala</option>
+                                    <option value="Puttalam">Puttalam</option>
+                                    <option value="Anuradhapura">Anuradhapura</option>
+                                    <option value="Polonnaruwa">Polonnaruwa</option>
+                                    <option value="Badulla">Badulla</option>
+                                    <option value="Monaragala">Monaragala</option>
+                                    <option value="Ratnapura">Ratnapura</option>
+                                    <option value="Kegalle">Kegalle</option>
+                                </select>
+                            </div>
+                            <div><label class="block mb-1.5">Triage Severity Rank</label><select id="em-urgency" class="w-full p-3 border border-slate-200 rounded-xl bg-white font-semibold text-slate-700 outline-none"><option value="3">3 - Critical Severity</option><option value="2">2 - Urgent Severity</option><option value="1">1 - Normal Severity</option></select></div>
+                            <button type="submit" class="w-full bg-rose-600 text-white font-black py-3.5 text-sm uppercase tracking-wider rounded-xl hover:bg-rose-700 shadow-lg shadow-rose-600/10 transition mt-2">Submit Request</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm lg:col-span-2 flex flex-col">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                            <h2 class="text-base font-extrabold text-slate-900">⚡ Emergency Priority Triage Queue</h2>
+                            <button onclick="triggerTriagePop()" class="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-800">Process Highest Priority Request</button>
+                        </div>
+                        <div id="heapTriageResult" class="hidden mb-4 p-5 bg-gradient-to-r from-slate-900 to-slate-850 text-white rounded-2xl shadow-inner text-sm"></div>
+                        <div id="emergencyHeapList" class="space-y-3 overflow-y-auto flex-1"></div>
+                    </div>
+                </div>
+
+                <div id="view-eligibility" class="hidden max-w-xl bg-white rounded-3xl p-8 border border-slate-200/60 shadow-sm app-view">
+    <h2 class="text-base font-extrabold text-slate-900 mb-2">Medical Safety Window Verification</h2>
+    <p class="text-xs font-medium text-slate-400 mb-6 pb-3 border-b border-slate-100">Validates required resting periods based on donation history before approving new allocations.</p>
+    <div class="space-y-5 text-xs font-bold text-slate-500 uppercase tracking-wider relative">
+        
+        <div class="relative">
+            <label class="block mb-2 text-slate-500">Search System Donor (Type Name or ID)</label>
+            <div class="relative">
+                <input type="text" id="eligibilitySearchInput" oninput="filterEligibilitySearch(this.value)" onclick="toggleEligibilityDropdown(true)" class="w-full p-3.5 border border-slate-200 rounded-xl bg-white text-slate-800 font-semibold text-sm outline-none focus:border-brand-500" placeholder="Type to search e.g. Thamasha or D106...">
+                <span class="absolute right-4 top-4 text-slate-400 pointer-events-none">🔍</span>
+            </div>
+            <div id="eligibilityCustomDropdown" class="hidden absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50 text-slate-700 font-semibold normal-case">
+                </div>
+            <input type="hidden" id="eligibilityDonorSelect" value="">
+        </div>
+
+        <div>
+            <label class="block mb-2 text-slate-500">Input Last Donation Date</label>
+            <input type="date" id="el-date" class="w-full p-3.5 border rounded-xl text-slate-800 font-semibold text-sm outline-none bg-slate-50/50 focus:border-brand-500">
+        </div>
+
+        <button onclick="calculateEligibility()" class="w-full bg-blue-600 text-white font-black py-4 text-sm rounded-xl tracking-wider hover:bg-blue-700 transition">Evaluate Eligibility Status</button>
+        <div id="eligibilityResult" class="hidden p-5 rounded-2xl border text-sm font-bold"></div>
+    </div>
+</div>
+<div id="view-analytics" class="hidden space-y-6 app-view">
+    <h2 class="text-base font-extrabold text-slate-900 pb-3 border-b border-slate-100">📊 Supply & Demand Analytics Summary</h2>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        
+        <div class="bg-white p-6 border border-slate-200/60 rounded-3xl shadow-sm">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Availability by Blood Group</h3>
+            <div class="space-y-3 font-semibold text-xs text-slate-600 text-left">
+                <div><div class="flex justify-between mb-1"><span>A+ Category</span><span id="an-bg-A_pos" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-A_pos" class="bg-red-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>A- Category</span><span id="an-bg-A_neg" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-A_neg" class="bg-rose-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>B+ Category</span><span id="an-bg-B_pos" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-B_pos" class="bg-amber-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>B- Category</span><span id="an-bg-B_neg" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-B_neg" class="bg-orange-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>O+ Category</span><span id="an-bg-O_pos" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-O_pos" class="bg-emerald-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>O- Category</span><span id="an-bg-O_neg" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-O_neg" class="bg-teal-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>AB+ Category</span><span id="an-bg-AB_pos" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-AB_pos" class="bg-blue-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>AB- Category</span><span id="an-bg-AB_neg" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-AB_neg" class="bg-indigo-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 border border-slate-200/60 rounded-3xl shadow-sm xl:col-span-1">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Donor Density by District (25 Districts)</h3>
+            <div class="space-y-2 font-semibold text-[11px] text-slate-600 text-left max-h-[380px] overflow-y-auto pr-1">
+                <script>
+                    const districtsSriLanka = [
+                        "Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", 
+                        "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", 
+                        "Mullaitivu", "Vavuniya", "Trincomalee", "Batticaloa", "Ampara", 
+                        "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", 
+                        "Monaragala", "Ratnapura", "Kegalle"
+                    ];
+                    districtsSriLanka.forEach(dst => {
+                        let safeId = dst.toLowerCase().replace(" ", "_");
+                        document.write(`
+                            <div class="mb-1.5">
+                                <div class="flex justify-between text-[10px] mb-0.5"><span>${dst}</span><span id="an-dist-${safeId}" class="font-bold text-slate-900">0</span></div>
+                                <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden"><div id="an-bar-${safeId}" class="bg-blue-600 h-full w-[0%] transition-all duration-500"></div></div>
+                            </div>
+                        `);
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 border border-slate-200/60 rounded-3xl shadow-sm flex flex-col">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Triage Priority Ratio Load</h3>
+            <div class="space-y-3 font-semibold text-xs text-slate-600 text-left flex-1">
+                <div><div class="flex justify-between mb-1"><span>Critical Severity (Level 3)</span><span id="an-urg-3" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-urg3" class="bg-rose-600 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>Urgent Severity (Level 2)</span><span id="an-urg-2" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-urg2" class="bg-amber-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+                <div><div class="flex justify-between mb-1"><span>Normal Severity (Level 1)</span><span id="an-urg-1" class="font-bold text-slate-900">0</span></div><div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div id="an-bar-urg1" class="bg-emerald-500 h-full w-[0%] transition-all duration-500"></div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="app.js"></script>
+</body>
+</html>

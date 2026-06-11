@@ -1,0 +1,32 @@
+# depslib dependency file v1.0
+1781162389 source:d:\desktop\nibm\hdse\pdsa\smartblooddonor\smartblooddonorbackend\main.cpp
+	"httplib.h"
+	"avl_tree.h"
+	"doubly_linked_list.h"
+	"priority_heap.h"
+	<iostream>
+	<sstream>
+
+1780557852 d:\desktop\nibm\hdse\pdsa\smartblooddonor\smartblooddonorbackend\avl_tree.h
+	<string>
+	<iostream>
+	<vector>
+
+1780557888 d:\desktop\nibm\hdse\pdsa\smartblooddonor\smartblooddonorbackend\doubly_linked_list.h
+	<string>
+	<iostream>
+	<vector>
+
+1780558426 d:\desktop\nibm\hdse\pdsa\smartblooddonor\smartblooddonorbackend\priority_heap.h
+	<string>
+	<vector>
+	<iostream>
+
+1780607543 d:\desktop\nibm\hdse\pdsa\smartblooddonor\smartblooddonorbackend\httplib.h
+	<iostream>
+	<string>
+	<sstream>
+	<map>
+	<functional>
+	<winsock2.h>
+

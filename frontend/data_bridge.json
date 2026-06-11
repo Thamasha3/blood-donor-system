@@ -1,0 +1,45 @@
+{
+  "donors": [
+    {
+      "id": "D101",
+      "name": "Amal Perera",
+      "blood": "A+",
+      "district": "Matara"
+    },
+    {
+      "id": "D102",
+      "name": "Gothami Silva",
+      "blood": "O-",
+      "district": "Galle"
+    },
+    {
+      "id": "D103",
+      "name": "Janith Nimesha",
+      "blood": "B+",
+      "district": "Colombo"
+    },
+    {
+      "id": "D110",
+      "name": "Nethum",
+      "blood": "B+",
+      "district": "Hambanthota"
+    }
+  ],
+  "emergencies": [
+    {
+      "id": "REQ-801",
+      "blood": "O-",
+      "urgency": "CRITICAL"
+    },
+    {
+      "id": "REQ-802",
+      "blood": "A+",
+      "urgency": "NORMAL"
+    },
+    {
+      "id": "REQ-803",
+      "blood": "B+",
+      "urgency": "URGENT"
+    }
+  ]
+}
